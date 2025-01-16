@@ -1,0 +1,80 @@
+macroScript CustomCopyPaste
+category:"Custom Tools"
+buttonText:"Copy"
+toolTip:"Copy/Paste Objects"
+icon:#("MAX_EDIT_COPY",1)
+(
+    -- Temp dosya yolu oluşturma
+    fn getTempFilePath = 
+    (
+        tempPath = (getDir #temp) + "\\maxCopyPasteTemp.max"
+        return tempPath
+    )
+    
+    -- Copy fonksiyonu
+    fn copySelectedObject =
+    (
+        if selection.count > 0 then
+        (
+            try
+            (
+                tempFile = getTempFilePath()
+                saveNodes selection tempFile
+                messageBox "Obje kopyalandı!" title:"Bilgi"
+            )
+            catch
+            (
+                messageBox "Kopyalama sırasında bir hata oluştu!" title:"Hata"
+            )
+        )
+        else
+        (
+            messageBox "Lütfen bir obje seçin!" title:"Uyarı"
+        )
+    )
+    
+    -- Paste fonksiyonu
+    fn pasteObject =
+    (
+        try
+        (
+            tempFile = getTempFilePath()
+            if doesFileExist tempFile then
+            (
+                mergeMAXFile tempFile #select #autoRenameDups
+                messageBox "Obje yapıştırıldı!" title:"Bilgi"
+            )
+            else
+            (
+                messageBox "Kopyalanmış obje bulunamadı!" title:"Uyarı"
+            )
+        )
+        catch
+        (
+            messageBox "Yapıştırma sırasında bir hata oluştu!" title:"Hata"
+        )
+    )
+    
+    -- Menü oluşturma
+    rollout copyPasteRollout "Copy Paste Tools"
+    (
+        button btnCopy "Copy" width:80 height:25
+        button btnPaste "Paste" width:80 height:25
+        
+        on btnCopy pressed do
+        (
+            copySelectedObject()
+        )
+        
+        on btnPaste pressed do
+        (
+            pasteObject()
+        )
+    )
+    
+    -- Rollout'u göster
+    on execute do
+    (
+        createDialog copyPasteRollout 100 70
+    )
+)
